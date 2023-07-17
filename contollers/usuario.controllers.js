@@ -1,4 +1,4 @@
-
+const Usuario = require('../models/Usuario.js'); 
 
 const getUsers = (req, res)=>{
     res.status(500).json({
@@ -6,9 +6,13 @@ const getUsers = (req, res)=>{
     });
 }
 
-const postUsers = (req, res)=>{
+const postUsers = async (req, res)=>{
+    const body = req.body;
+    const usuario = new Usuario(body);
+    await usuario.save();
     res.status(500).json({
-        "message":"post page"
+        "message":"post page",
+        usuario
     });
 }
 
