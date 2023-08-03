@@ -1,11 +1,12 @@
 const {response} = require('express');
 const Usuario = require('../models/Usuario');
 const bcryptjs = require('bcryptjs');
+const { generateJWT } = require('../helpers/generate.JWT');
 
 const login = async ( req,res=response )=>{
     const {email, password} = req.body;
     try {
-        /* Verificar si existe el email en a vasse de datos */
+        /* Verificar si existe el email en a base de datos */
         /* const usuario = new Usuario ({email,password}); */
         const emailExiste = await Usuario.findOne({email});
         if(!emailExiste){
@@ -16,6 +17,7 @@ const login = async ( req,res=response )=>{
 
         /* Verificar si el usuario esta activo */
         if((emailExiste.estado) === false){
+            /* if(!emailExiste.estado){  otra forma de hacerlo es */
             return res.status(400).json({
                 msg:"Usuario esta inactivo"
             });
@@ -33,8 +35,13 @@ const login = async ( req,res=response )=>{
         if(password === email.password)
         return res.status(400).json({ msg: "La contra es correcta"})
 
+        /* Generación para validación de JSON WEB TOKEN */
+        
+        const token = await generateJWT(emailExiste.id)
+        
         res.json({
-            msg: "All good chiquita"
+            emailExiste, 
+            token
         })
     } catch (error) {
         console.log(error);
@@ -47,3 +54,9 @@ const login = async ( req,res=response )=>{
 module.exports = {
     login 
 }
+
+/* function parseJwt(token){
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace('-','+').replace('_', '/');
+    return JSON.parse(window.atob(base64));
+} */
